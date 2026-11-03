@@ -4,8 +4,9 @@
 
 输入文档所在网页的网址，查找并验证原始 PDF，提供原始地址、打开文件、复制链接和下载功能。
 
-- **GitHub Pages 入口：** https://zehanjsu-cyber.github.io/pdf-link/
-- **运行服务：** https://pdf-link-deploy-vmzdgdhc-2paxnehj.edgeone.cool
+- **GitHub Pages 入口（尚未启用，非当前访问地址）：** https://zehanjsu-cyber.github.io/pdf-link/
+- **当前运行网站：** https://pdf-link-zehan.onrender.com
+- **托管：** Render Free · Singapore · 作者：泽涵
 
 ## 支持的网页
 
@@ -74,3 +75,11 @@ npm test
 ## EdgeOne 默认域名限制
 
 EdgeOne 官方说明：中国大陆访问平台默认域名需使用预览链接，链接有效期为 3 小时，过期返回 401。原有 GitHub Pages 入口嵌入 EdgeOne，仍会受到该限制。参考：https://pages.edgeone.ai/document/domain-overview
+
+## 本次上线验证
+
+Render 部署状态：Live，方案：Free，区域：Singapore。独立运行环境已检查主页、作者署名、健康检查、网页 PDF 地址解析和完整文件下载；测试文档大小为 1,110,210 字节。
+
+验证记录：https://github.com/zehanjsu-cyber/pdf-link/actions/runs/41635290979
+
+当前网站无需 EdgeOne 预览访问凭证，不使用旧预览链接。中国大陆具体网络的可达性仍需用户实测。免费服务闲置后可能休眠，唤醒会较慢。
