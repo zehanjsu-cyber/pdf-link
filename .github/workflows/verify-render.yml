@@ -1,0 +1,69 @@
+name: Verify live Render PDF service
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verify-render.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check live page, resolver and PDF download
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, json, time, urllib.request, urllib.error
+          base = "https://pdf-link-zehan.onrender.com"
+          state = "failure"
+          description = "Live PDF check did not complete"
+          try:
+              last_error = None
+              for attempt in range(10):
+                  try:
+                      with urllib.request.urlopen(base + "/healthz", timeout=25) as response:
+                          assert response.status == 200
+                          assert json.load(response)["status"] == "ok"
+                      break
+                  except Exception as error:
+                      last_error = error
+                      if attempt == 9:
+                          raise
+                      time.sleep(8)
+              with urllib.request.urlopen(base + "/", timeout=30) as response:
+                  page = response.read().decode("utf-8")
+                  assert "作者：泽涵" in page, "Missing author credit"
+                  assert "网页 PDF 解析工具" in page, "Unexpected frontend version"
+              source = "https://jxcg.scu.edu.cn/kxkjc_dysrt_szhqd_rhsjyxtxdgjysj/zccl/jxcgzjbg.htm"
+              request = urllib.request.Request(base + "/api/resolve", data=json.dumps({"url": source}).encode(), headers={"Content-Type": "application/json"})
+              with urllib.request.urlopen(request, timeout=110) as response:
+                  result = json.load(response)
+                  assert result["verified"] is True
+                  assert result["url"].endswith(".pdf")
+                  assert result["download"].startswith("/api/download?")
+              with urllib.request.urlopen(base + result["download"], timeout=110) as response:
+                  content = response.read()
+                  assert content.startswith(b"%PDF-"), "Downloaded content is not PDF"
+                  assert len(content) > 10000, "Incomplete PDF"
+                  if result.get("bytes"):
+                      assert len(content) == result["bytes"], "Download size mismatch"
+              state = "success"
+              description = "Page, author credit, PDF resolve and download passed: " + str(len(content)) + " bytes"
+              print(json.dumps({"verification": "passed", "url": base, "pdf": result["url"], "bytes": len(content)}, ensure_ascii=False))
+          except Exception as error:
+              description = (type(error).__name__ + ": " + str(error))[:140]
+              print("VERIFICATION FAILED:", description)
+          finally:
+              target = "https://github.com/" + os.environ["GITHUB_REPOSITORY"] + "/actions/runs/" + os.environ["GITHUB_RUN_ID"]
+              payload = {"state": state, "context": "render/live-pdf-smoke", "description": description[:140], "target_url": target}
+              api = "https://api.github.com/repos/" + os.environ["GITHUB_REPOSITORY"] + "/statuses/" + os.environ["GITHUB_SHA"]
+              request = urllib.request.Request(api, data=json.dumps(payload).encode(), headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"], "Accept": "application/vnd.github+json", "Content-Type": "application/json"}, method="POST")
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  print("Recorded verification result:", response.status, state)
+          if state != "success":
+              raise SystemExit(1)
+          PY
