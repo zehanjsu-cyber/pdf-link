@@ -18,7 +18,18 @@
 
 解析器会读取并检查返回文件的 `%PDF-` 标识，不会把 HTML 错当成 PDF，也不会把预览图片合成为“原始文件”。无 PDF 的纯文字页、需要登录或依赖动态执行脚本的页面可能无法解析。
 
-## 托管结构
+## 免费完整托管（Node.js / Render）
+
+新增 `server.mjs` 将网页与解析 API 放在同一服务中，可部署到支持 Node.js 的平台。`render.yaml` 明确使用免费计划和新加坡区域，无需自购域名。
+
+```bash
+npm test
+npm start
+```
+
+Render 启动命令为 `npm start`，构建检查为 `npm test`，健康检查为 `/healthz`。网站地址以平台实际部署结果为准。免费服务可能休眠、唤醒较慢；中国大陆访问仍需实测，不保证所有网络可达。部署到该服务后，原始页面及 API 不依赖 EdgeOne。
+
+## 原有托管结构
 
 GitHub 保存完整源码，GitHub Pages 发布 `docs/` 下的静态入口。GitHub Pages 本身不能运行服务器解析接口，所以入口通过 iframe 加载现有 EdgeOne 网站；解析和下载继续由 EdgeOne 执行。该入口需要 EdgeOne 服务保持可访问，并允许嵌入。
 
@@ -59,3 +70,7 @@ npm test
 ## 使用边界
 
 请仅下载你有权访问的文件。工具不登录第三方账号，不绕过原站访问权限，也不承诺能够从任意网站恢复不存在或未提供的原始 PDF。
+
+## EdgeOne 默认域名限制
+
+EdgeOne 官方说明：中国大陆访问平台默认域名需使用预览链接，链接有效期为 3 小时，过期返回 401。原有 GitHub Pages 入口嵌入 EdgeOne，仍会受到该限制。参考：https://pages.edgeone.ai/document/domain-overview

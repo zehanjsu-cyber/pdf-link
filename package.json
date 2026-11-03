@@ -4,7 +4,11 @@
   "type": "module",
   "description": "拾页：网页 PDF 原始地址解析工具",
   "scripts": {
-    "test": "node tests/resolve.test.mjs"
+    "test": "node tests/resolve.test.mjs",
+    "start": "node server.mjs"
   },
-  "author": "泽涵"
+  "author": "泽涵",
+  "engines": {
+    "node": ">=22"
+  }
 }

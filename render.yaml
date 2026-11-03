@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: pdf-link
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm test
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
